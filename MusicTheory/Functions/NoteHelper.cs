@@ -29,7 +29,8 @@
             var newPitchClass = (PitchClass)newPitchValue;
             var newOctave = note.Octave + octaveShift;
 
-            return new Note(newPitchClass, newOctave);
+            // Transposition doesn't preserve spelling - would need key context for that
+            return new Note(newPitchClass, newOctave, SpelledName: null, Accidental: null);
 
         }
 

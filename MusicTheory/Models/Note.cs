@@ -16,5 +16,20 @@
         B = 11
     }
 
-    public readonly record struct Note(PitchClass PitchClass, int Octave);
+    public enum NoteName { C, D, E, F, G, A, B }
+
+    public enum Accidental
+    {
+        DoubleFlag = -2,
+        Flat = -1,
+        Natural = 0,
+        Sharp = 1,
+        DoubleSharp = 2
+    }
+
+    public readonly record struct Note(
+        PitchClass PitchClass,
+        int Octave,
+        NoteName? SpelledName,
+        Accidental? Accidental);
 }

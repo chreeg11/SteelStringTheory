@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch PedalSteelGuitar",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/PedalSteelGuitar/bin/Debug/net10.0/PedalSteelGuitar.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/PedalSteelGuitar",
+            "console": "internalConsole",
+            "stopAtEntry": false
+        }
+    ]
+}
