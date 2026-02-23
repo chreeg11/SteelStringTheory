@@ -27,74 +27,116 @@ public class ScaleHelperTests
     }
 
     [Theory]
-   [InlineData(NoteName.C, Accidental.Natural)]
-   [InlineData(NoteName.D, Accidental.Natural)]
-   [InlineData(NoteName.E, Accidental.Natural)]
-   [InlineData(NoteName.F, Accidental.Natural)]
-   [InlineData(NoteName.G, Accidental.Natural)]
-   [InlineData(NoteName.A, Accidental.Natural)]
-   [InlineData(NoteName.B, Accidental.Natural)]
-   [InlineData(NoteName.C, Accidental.Sharp)]
-   [InlineData(NoteName.D, Accidental.Sharp)]
-   [InlineData(NoteName.F, Accidental.Sharp)]
-   [InlineData(NoteName.G, Accidental.Sharp)]
-   [InlineData(NoteName.A, Accidental.Sharp)]
-   public void MajorScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
-   {
-       var root = new Note(name, accidental, 4);
-       var result = ScaleHelper.TryGenerateScale(root, ScaleType.Major, out var scale);
+    [InlineData(NoteName.C, Accidental.Natural)]
+    [InlineData(NoteName.D, Accidental.Natural)]
+    [InlineData(NoteName.E, Accidental.Natural)]
+    [InlineData(NoteName.F, Accidental.Natural)]
+    [InlineData(NoteName.G, Accidental.Natural)]
+    [InlineData(NoteName.A, Accidental.Natural)]
+    [InlineData(NoteName.B, Accidental.Natural)]
+    [InlineData(NoteName.C, Accidental.Sharp)]
+    [InlineData(NoteName.D, Accidental.Sharp)]
+    [InlineData(NoteName.F, Accidental.Sharp)]
+    [InlineData(NoteName.G, Accidental.Sharp)]
+    [InlineData(NoteName.A, Accidental.Sharp)]
+    public void MajorScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
+    {
+        var root = new Note(name, accidental, 4);
+        var result = ScaleHelper.TryGenerateScale(root, ScaleType.Major, out var scale);
 
-       Assert.True(result);
+        Assert.True(result);
 
-       // Verify interval pattern between consecutive notes
-       int[] expectedIntervals = [2, 2, 1, 2, 2, 2, 1];
-       for (int i = 0; i < expectedIntervals.Length; i++)
-       {
-           int actual = scale[i + 1].MidiNumber - scale[i].MidiNumber;
-           Assert.Equal(expectedIntervals[i], actual);
-       }
+        // Verify interval pattern between consecutive notes
+        int[] expectedIntervals = [2, 2, 1, 2, 2, 2, 1];
+        for (int i = 0; i < expectedIntervals.Length; i++)
+        {
+            int actual = scale[i + 1].MidiNumber - scale[i].MidiNumber;
+            Assert.Equal(expectedIntervals[i], actual);
+        }
 
-       // Verify root is first
-       Assert.Equal(root.PitchClass, scale[0].PitchClass);
+        // Verify root is first
+        Assert.Equal(root.PitchClass, scale[0].PitchClass);
 
-       // Verify 7 unique pitch classes (no duplicates in the scale degrees)
-       var uniquePitchClasses = scale.Take(7).Select(n => n.PitchClass).Distinct().Count();       
-       Assert.Equal(7, uniquePitchClasses);
-   }
+        // Verify 7 unique pitch classes (no duplicates in the scale degrees)
+        var uniquePitchClasses = scale.Take(7).Select(n => n.PitchClass).Distinct().Count();       
+        Assert.Equal(7, uniquePitchClasses);
+    }
 
-   [Theory]
-   [InlineData(NoteName.C, Accidental.Natural)]
-   [InlineData(NoteName.D, Accidental.Natural)]
-   [InlineData(NoteName.E, Accidental.Natural)]
-   [InlineData(NoteName.F, Accidental.Natural)]
-   [InlineData(NoteName.G, Accidental.Natural)]
-   [InlineData(NoteName.A, Accidental.Natural)]
-   [InlineData(NoteName.B, Accidental.Natural)]
-   [InlineData(NoteName.C, Accidental.Sharp)]
-   [InlineData(NoteName.D, Accidental.Sharp)]
-   [InlineData(NoteName.F, Accidental.Sharp)]
-   [InlineData(NoteName.G, Accidental.Sharp)]
-   [InlineData(NoteName.A, Accidental.Sharp)]
-   public void IonianScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
-   {
-       var root = new Note(name, accidental, 4);
-       var result = ScaleHelper.TryGenerateScale(root, ScaleType.Ionian, out var scale);
+    [Fact]
+    public void Generate_C_Ionian_Scale()
+    {
+        var c4 = new Note(NoteName.C, Accidental.Natural, 4);
+        var result = ScaleHelper.TryGenerateScale(c4, ScaleType.Ionian, out var CIonianScale);
+        Assert.True(result);
+        Assert.Equal(8, CIonianScale.Length);
 
-       Assert.True(result);
+        Note[] expected = [
+            new(NoteName.C, Accidental.Natural, 4),
+            new(NoteName.D, Accidental.Natural, 4),
+            new(NoteName.E, Accidental.Natural, 4),
+            new(NoteName.F, Accidental.Natural, 4),
+            new(NoteName.G, Accidental.Natural, 4),
+            new(NoteName.A, Accidental.Natural, 4),
+            new(NoteName.B, Accidental.Natural, 4),
+            new(NoteName.C, Accidental.Natural, 5),
+        ];
+        Assert.Equal(expected, CIonianScale);
+    }
 
-       // Verify interval pattern between consecutive notes
-       int[] expectedIntervals = [2, 2, 1, 2, 2, 2, 1];
-       for (int i = 0; i < expectedIntervals.Length; i++)
-       {
-           int actual = scale[i + 1].MidiNumber - scale[i].MidiNumber;
-           Assert.Equal(expectedIntervals[i], actual);
-       }
+    [Theory]
+    [InlineData(NoteName.C, Accidental.Natural)]
+    [InlineData(NoteName.D, Accidental.Natural)]
+    [InlineData(NoteName.E, Accidental.Natural)]
+    [InlineData(NoteName.F, Accidental.Natural)]
+    [InlineData(NoteName.G, Accidental.Natural)]
+    [InlineData(NoteName.A, Accidental.Natural)]
+    [InlineData(NoteName.B, Accidental.Natural)]
+    [InlineData(NoteName.C, Accidental.Sharp)]
+    [InlineData(NoteName.D, Accidental.Sharp)]
+    [InlineData(NoteName.F, Accidental.Sharp)]
+    [InlineData(NoteName.G, Accidental.Sharp)]
+    [InlineData(NoteName.A, Accidental.Sharp)]
+    public void IonianScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
+    {
+        var root = new Note(name, accidental, 4);
+        var result = ScaleHelper.TryGenerateScale(root, ScaleType.Ionian, out var scale);
 
-       // Verify root is first
-       Assert.Equal(root.PitchClass, scale[0].PitchClass);
+        Assert.True(result);
 
-       // Verify 7 unique pitch classes (no duplicates in the scale degrees)
-       var uniquePitchClasses = scale.Take(7).Select(n => n.PitchClass).Distinct().Count();       
-       Assert.Equal(7, uniquePitchClasses);
-   }
+        // Verify interval pattern between consecutive notes
+        int[] expectedIntervals = [2, 2, 1, 2, 2, 2, 1];
+        for (int i = 0; i < expectedIntervals.Length; i++)
+        {
+            int actual = scale[i + 1].MidiNumber - scale[i].MidiNumber;
+            Assert.Equal(expectedIntervals[i], actual);
+        }
+
+        // Verify root is first
+        Assert.Equal(root.PitchClass, scale[0].PitchClass);
+
+        // Verify 7 unique pitch classes (no duplicates in the scale degrees)
+        var uniquePitchClasses = scale.Take(7).Select(n => n.PitchClass).Distinct().Count();       
+        Assert.Equal(7, uniquePitchClasses);
+    }
+
+    [Fact]
+    public void Generate_C_Dorian_Scale()
+    {
+        var c4 = new Note(NoteName.C, Accidental.Natural, 4);
+        var result = ScaleHelper.TryGenerateScale(c4, ScaleType.Dorian, out var CDorianScale);
+        Assert.True(result);
+        Assert.Equal(8, CDorianScale.Length);
+
+        Note[] expected = [
+            new(NoteName.C, Accidental.Natural, 4),
+            new(NoteName.D, Accidental.Natural, 4),
+            new(NoteName.E, Accidental.Flat, 4),
+            new(NoteName.F, Accidental.Natural, 4),
+            new(NoteName.G, Accidental.Natural, 4),
+            new(NoteName.A, Accidental.Natural, 4),
+            new(NoteName.B, Accidental.Flat, 4),
+            new(NoteName.C, Accidental.Natural, 5),
+        ];
+        Assert.Equal(expected, CDorianScale);
+    }
 }

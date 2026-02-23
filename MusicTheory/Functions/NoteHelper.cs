@@ -25,15 +25,22 @@
         // Move a note up/down by semitones, using default sharp spelling
         public static Note Transpose(Note note, int semitones)
         {
-            // Step 1: Get new absolute position
             int newMidi = note.MidiNumber + semitones;
-
-            // Step 2: Split into pitch class (0-11) and octave
             int pitchClass = ((newMidi % 12) + 12) % 12;
+            var (name, accidental) = DefaultSpelling[pitchClass];
             int octave = (newMidi - pitchClass) / 12 - 1;
 
-            // Step 3: Look up default spelling
-            var (name, accidental) = DefaultSpelling[pitchClass];
+            return new Note(name, accidental, octave);
+        }
+
+        // Move a note up/down by semitones, using Key for context-aware spelling
+        public static Note Transpose(Note note, int semitones, Key key)
+        {
+            int newMidi = note.MidiNumber + semitones;
+            int pitchClass = ((newMidi % 12) + 12) % 12;
+            var (name, accidental) = key.SpellPitchClass(pitchClass);
+            int semitone = Note.NaturalSemitone(name) + (int)accidental;
+            int octave = (newMidi - semitone) / 12 - 1;
 
             return new Note(name, accidental, octave);
         }

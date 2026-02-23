@@ -27,6 +27,8 @@
             { NoteName.B, 11 },
         };
 
+        public static int NaturalSemitone(NoteName name) => SemitonesFromC[name];
+
         public int Semitone => SemitonesFromC[SpelledName] + (int)Accidental;
         public int PitchClass => ((Semitone % 12) + 12) % 12;
         public int MidiNumber => (Octave + 1) * 12 + Semitone;

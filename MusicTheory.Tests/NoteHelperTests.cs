@@ -54,6 +54,44 @@ public class NoteHelperTests
         Assert.Equal(fromDb.MidiNumber, fromCs.MidiNumber);
     }
 
+    [Fact]
+    public void Transpose_WithKey_SpellsFlatsCorrectly()
+    {
+        var c4 = new Note(NoteName.C, Accidental.Natural, 4);
+        var key = new Key(NoteName.C, Accidental.Natural, [2, 1, 2, 2, 2, 1, 2]); // Dorian
+
+        var result = NoteHelper.Transpose(c4, 3, key); // C + 3 = Eb
+
+        Assert.Equal(NoteName.E, result.SpelledName);
+        Assert.Equal(Accidental.Flat, result.Accidental);
+        Assert.Equal(4, result.Octave);
+    }
+
+    [Fact]
+    public void Transpose_WithKey_OctaveCrossing()
+    {
+        var a4 = new Note(NoteName.A, Accidental.Natural, 4);
+        var key = new Key(NoteName.F, Accidental.Natural, [2, 2, 1, 2, 2, 2, 1]); // F Major
+
+        var result = NoteHelper.Transpose(a4, 3, key); // A4 + 3 = C5
+
+        Assert.Equal(NoteName.C, result.SpelledName);
+        Assert.Equal(Accidental.Natural, result.Accidental);
+        Assert.Equal(5, result.Octave);
+    }
+
+    [Fact]
+    public void Transpose_WithKey_NonScaleToneFallsBackToSharp()
+    {
+        var c4 = new Note(NoteName.C, Accidental.Natural, 4);
+        var key = new Key(NoteName.C, Accidental.Natural, [2, 2, 1, 2, 2, 2, 1]); // C Major
+
+        var result = NoteHelper.Transpose(c4, 1, key); // pitch class 1 is non-scale
+
+        Assert.Equal(NoteName.C, result.SpelledName);
+        Assert.Equal(Accidental.Sharp, result.Accidental);
+    }
+
     // --- IntervalBetween Tests ---
 
     [Theory]

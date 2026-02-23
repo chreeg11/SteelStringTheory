@@ -7,7 +7,7 @@ namespace MusicTheory.Models
         Dorian = 2,
         Phrygian = 3,
         Lydian = 4,
-        MixoLydian = 5,
+        Mixolydian = 5,
         Aeolian = 6,
         NaturalMinor = 7, // Same as Aeolian but we want a separate entry
         Locrian = 8,
