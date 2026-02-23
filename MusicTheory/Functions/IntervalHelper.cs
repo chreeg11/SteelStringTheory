@@ -4,8 +4,8 @@
 
     public static class IntervalHelper
     {
-        private static readonly string[] IntervalNames = new[]
-        {
+        private static readonly string[] IntervalNames =
+        [
             "Unison",        // 0
             "Minor 2nd",     // 1
             "Major 2nd",     // 2
@@ -18,26 +18,19 @@
             "Major 6th",     // 9
             "Minor 7th",     // 10
             "Major 7th",     // 11
-            "Octave"         // 12
-        };
+        ];
 
-        public static string GetIntervalName(int semitones, bool descending = false)
+        public static string GetIntervalName(int semitones)
         {
-            // Protect against out-of-bounds values
-            if (semitones < 0)
-            {
-                semitones = -semitones;
-                descending = !descending;
-            }
-            semitones = semitones % 12;
-            return IntervalNames[semitones];
+            // Handle negatives and wrap to 0-11
+            int normalized = ((semitones % 12) + 12) % 12;
+            return IntervalNames[normalized];
         }
 
         public static Interval GetInterval(Note from, Note to)
         {
-            // Returns semitone distance and direction
-            return new Interval();
+            int semitones = to.MidiNumber - from.MidiNumber;
+            return new Interval(Math.Abs(semitones), IsDescending: semitones < 0);
         }
-
     }
 }

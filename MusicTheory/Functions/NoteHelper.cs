@@ -4,43 +4,44 @@
 
     public static class NoteHelper
     {
-        // Move a note up/down by semitones, wrapping around 12
+        // Default spelling for each pitch class (0-11), using sharps.
+        // Later, a Key can override these to use flats where appropriate.
+        private static readonly (NoteName Name, Accidental Accidental)[] DefaultSpelling =
+        [
+            (NoteName.C, Accidental.Natural),   // 0
+            (NoteName.C, Accidental.Sharp),     // 1
+            (NoteName.D, Accidental.Natural),   // 2
+            (NoteName.D, Accidental.Sharp),     // 3
+            (NoteName.E, Accidental.Natural),   // 4
+            (NoteName.F, Accidental.Natural),   // 5
+            (NoteName.F, Accidental.Sharp),     // 6
+            (NoteName.G, Accidental.Natural),   // 7
+            (NoteName.G, Accidental.Sharp),     // 8
+            (NoteName.A, Accidental.Natural),   // 9
+            (NoteName.A, Accidental.Sharp),     // 10
+            (NoteName.B, Accidental.Natural),   // 11
+        ];
+
+        // Move a note up/down by semitones, using default sharp spelling
         public static Note Transpose(Note note, int semitones)
         {
-            int pitchValue = (int)note.PitchClass;
-            int totalSemitones = pitchValue + semitones;
+            // Step 1: Get new absolute position
+            int newMidi = note.MidiNumber + semitones;
 
-            int newPitchValue;
-            int octaveShift;
+            // Step 2: Split into pitch class (0-11) and octave
+            int pitchClass = ((newMidi % 12) + 12) % 12;
+            int octave = (newMidi - pitchClass) / 12 - 1;
 
-            if (totalSemitones >= 0)
-            {
-                newPitchValue = totalSemitones % 12;
-                octaveShift = totalSemitones / 12;
-            }
-            else
-            {
-                // Calculate how many full octaves down we go
-                int octavesDown = (Math.Abs(totalSemitones) + 11) / 12;
-                newPitchValue = (totalSemitones + (octavesDown * 12)) % 12;
-                octaveShift = -octavesDown;
-            }
+            // Step 3: Look up default spelling
+            var (name, accidental) = DefaultSpelling[pitchClass];
 
-            var newPitchClass = (PitchClass)newPitchValue;
-            var newOctave = note.Octave + octaveShift;
-
-            // Transposition doesn't preserve spelling - would need key context for that
-            return new Note(newPitchClass, newOctave, SpelledName: null, Accidental: null);
-
+            return new Note(name, accidental, octave);
         }
 
-        // Return semitone distance between two notes (ignores octave)
+        // Return semitone distance between two notes (ignores octave, always ascending 0-11)
         public static int IntervalBetween(Note root, Note target)
         {
-            int rootVal = (int)root.PitchClass;
-            int targetVal = (int)target.PitchClass;
-            int interval = (targetVal - rootVal + 12) % 12;
-            return interval;
+            return ((target.PitchClass - root.PitchClass) + 12) % 12;
         }
     }
 }
