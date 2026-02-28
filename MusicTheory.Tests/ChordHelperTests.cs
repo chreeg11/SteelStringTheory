@@ -120,7 +120,37 @@ public class ChordHelperTests
         Assert.Equal(9, chord[3].PitchClass);
     }
 
-    // --- Property-based: verify interval pattern for all chord types across all 12 roots ---
+    [Fact]
+    public void CMin7b5_Returns_C_Eb_Gb_Bb()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var key = new Key(NoteName.C, Accidental.Natural, Mode.Locrian);
+        var result = ChordHelper.TryGenerateChord(root, ChordType.Min7b5, key, out var chord);
+
+        Assert.True(result);
+        Assert.Equal(4, chord.Length);
+        Assert.Equal(new Note(NoteName.C, Accidental.Natural, 4), chord[0]);
+        Assert.Equal(new Note(NoteName.E, Accidental.Flat, 4), chord[1]);
+        Assert.Equal(new Note(NoteName.G, Accidental.Flat, 4), chord[2]);
+        Assert.Equal(new Note(NoteName.B, Accidental.Flat, 4), chord[3]);
+    }
+
+    [Fact]
+    public void CMin7_Returns_C_Eb_G_Bb()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var key = new Key(NoteName.C, Accidental.Natural, Mode.Minor);
+        var result = ChordHelper.TryGenerateChord(root, ChordType.Min7, key, out var chord);
+
+        Assert.True(result);
+        Assert.Equal(4, chord.Length);
+        Assert.Equal(new Note(NoteName.C, Accidental.Natural, 4), chord[0]);
+        Assert.Equal(new Note(NoteName.E, Accidental.Flat, 4), chord[1]);
+        Assert.Equal(new Note(NoteName.G, Accidental.Natural, 4), chord[2]);
+        Assert.Equal(new Note(NoteName.B, Accidental.Flat, 4), chord[3]);
+    }
+
+    // --- Property-based: verify interval pattern for all chord types across all roots ---
 
     [Theory]
     [InlineData(ChordType.Major, new[] { 4, 7 })]
@@ -131,22 +161,32 @@ public class ChordHelperTests
     [InlineData(ChordType.Min7, new[] { 3, 7, 10 })]
     [InlineData(ChordType.Dom7, new[] { 4, 7, 10 })]
     [InlineData(ChordType.Dim7, new[] { 3, 6, 9 })]
+    [InlineData(ChordType.Min7b5, new[] { 3, 6, 10 })]
     public void AllChordTypes_HaveCorrectIntervals_FromAllRoots(ChordType type, int[] expectedOffsets)
     {
         var roots = new (NoteName Name, Accidental Acc)[]
         {
             (NoteName.C, Accidental.Natural),
+            (NoteName.C, Accidental.Flat),
             (NoteName.C, Accidental.Sharp),
             (NoteName.D, Accidental.Natural),
+            (NoteName.D, Accidental.Flat),
             (NoteName.D, Accidental.Sharp),
             (NoteName.E, Accidental.Natural),
+            (NoteName.E, Accidental.Flat),
+            (NoteName.E, Accidental.Sharp),
             (NoteName.F, Accidental.Natural),
+            (NoteName.F, Accidental.Flat),
             (NoteName.F, Accidental.Sharp),
             (NoteName.G, Accidental.Natural),
+            (NoteName.G, Accidental.Flat),
             (NoteName.G, Accidental.Sharp),
             (NoteName.A, Accidental.Natural),
+            (NoteName.A, Accidental.Flat),
             (NoteName.A, Accidental.Sharp),
             (NoteName.B, Accidental.Natural),
+            (NoteName.B, Accidental.Flat),
+            (NoteName.B, Accidental.Sharp),
         };
 
         foreach (var (name, acc) in roots)

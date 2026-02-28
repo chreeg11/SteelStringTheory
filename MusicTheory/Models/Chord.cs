@@ -2,14 +2,18 @@ namespace MusicTheory.Models
 {
     public enum ChordType
     {
+        // Triads
         Major,
         Minor,
         Dim,
         Aug,
+
+        // Sevenths
         Maj7,
         Min7,
         Dom7,
         Dim7,
+        Min7b5,
     }
 
     public static class ChordPatterns
@@ -25,6 +29,7 @@ namespace MusicTheory.Models
             { ChordType.Min7, [3, 7, 10] },
             { ChordType.Dom7, [4, 7, 10] },
             { ChordType.Dim7, [3, 6, 9] },
+            { ChordType.Min7b5, [3, 6, 10] },
         };
 
         public static int[] GetPattern(ChordType chordType) => Patterns[chordType];
