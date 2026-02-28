@@ -58,7 +58,7 @@ public class NoteHelperTests
     public void Transpose_WithKey_SpellsFlatsCorrectly()
     {
         var c4 = new Note(NoteName.C, Accidental.Natural, 4);
-        var key = new Key(NoteName.C, Accidental.Natural, [2, 1, 2, 2, 2, 1, 2]); // Dorian
+        var key = new Key(NoteName.C, Accidental.Natural, Mode.Dorian);
 
         var result = NoteHelper.Transpose(c4, 3, key); // C + 3 = Eb
 
@@ -71,7 +71,7 @@ public class NoteHelperTests
     public void Transpose_WithKey_OctaveCrossing()
     {
         var a4 = new Note(NoteName.A, Accidental.Natural, 4);
-        var key = new Key(NoteName.F, Accidental.Natural, [2, 2, 1, 2, 2, 2, 1]); // F Major
+        var key = new Key(NoteName.F, Accidental.Natural, Mode.Major);
 
         var result = NoteHelper.Transpose(a4, 3, key); // A4 + 3 = C5
 
@@ -84,7 +84,7 @@ public class NoteHelperTests
     public void Transpose_WithKey_NonScaleToneFallsBackToSharp()
     {
         var c4 = new Note(NoteName.C, Accidental.Natural, 4);
-        var key = new Key(NoteName.C, Accidental.Natural, [2, 2, 1, 2, 2, 2, 1]); // C Major
+        var key = new Key(NoteName.C, Accidental.Natural, Mode.Major);
 
         var result = NoteHelper.Transpose(c4, 1, key); // pitch class 1 is non-scale
 

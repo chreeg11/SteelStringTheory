@@ -1,7 +1,7 @@
 namespace MusicTheory.Models
 {
     /// <summary>
-    /// A spelling context derived from a tonic note and scale interval pattern.
+    /// A spelling context derived from a tonic note and mode.
     /// Maps each pitch class (0-11) to the correct (NoteName, Accidental) spelling.
     /// Scale tones use key-aware spelling; non-scale tones fall back to sharp default.
     /// </summary>
@@ -25,13 +25,18 @@ namespace MusicTheory.Models
 
         public NoteName Tonic { get; }
         public Accidental TonicAccidental { get; }
+        public Mode Mode { get; }
         private readonly (NoteName Name, Accidental Accidental)[] _spellings;
 
-        public Key(NoteName tonic, Accidental tonicAccidental, int[] intervalPattern)
+        /// <summary>
+        /// Create a key from a tonic and mode. e.g. new Key(NoteName.C, Accidental.Natural, Mode.Minor)
+        /// </summary>
+        public Key(NoteName tonic, Accidental tonicAccidental, Mode mode)
         {
             Tonic = tonic;
             TonicAccidental = tonicAccidental;
-            _spellings = BuildSpellingTable(tonic, tonicAccidental, intervalPattern);
+            Mode = mode;
+            _spellings = BuildSpellingTable(tonic, tonicAccidental, ModePatterns.GetPattern(mode));
         }
 
         public (NoteName Name, Accidental Accidental) SpellPitchClass(int pitchClass)

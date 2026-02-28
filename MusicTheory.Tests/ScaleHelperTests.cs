@@ -9,7 +9,7 @@ public class ScaleHelperTests
     public void Generate_C_Major_Scale()
     {
         var c4 = new Note(NoteName.C, Accidental.Natural, 4);
-        var result = ScaleHelper.TryGenerateScale(c4, ScaleType.Major, out var CMajorScale);
+        var result = ScaleHelper.TryGenerateScale(c4, Mode.Major, out var CMajorScale);
         Assert.True(result);
         Assert.Equal(8, CMajorScale.Length);
 
@@ -42,7 +42,7 @@ public class ScaleHelperTests
     public void MajorScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
     {
         var root = new Note(name, accidental, 4);
-        var result = ScaleHelper.TryGenerateScale(root, ScaleType.Major, out var scale);
+        var result = ScaleHelper.TryGenerateScale(root, Mode.Major, out var scale);
 
         Assert.True(result);
 
@@ -66,7 +66,7 @@ public class ScaleHelperTests
     public void Generate_C_Ionian_Scale()
     {
         var c4 = new Note(NoteName.C, Accidental.Natural, 4);
-        var result = ScaleHelper.TryGenerateScale(c4, ScaleType.Ionian, out var CIonianScale);
+        var result = ScaleHelper.TryGenerateScale(c4, Mode.Ionian, out var CIonianScale);
         Assert.True(result);
         Assert.Equal(8, CIonianScale.Length);
 
@@ -99,7 +99,7 @@ public class ScaleHelperTests
     public void IonianScale_HasCorrectIntervalPattern(NoteName name, Accidental accidental)
     {
         var root = new Note(name, accidental, 4);
-        var result = ScaleHelper.TryGenerateScale(root, ScaleType.Ionian, out var scale);
+        var result = ScaleHelper.TryGenerateScale(root, Mode.Ionian, out var scale);
 
         Assert.True(result);
 
@@ -123,7 +123,7 @@ public class ScaleHelperTests
     public void Generate_C_Dorian_Scale()
     {
         var c4 = new Note(NoteName.C, Accidental.Natural, 4);
-        var result = ScaleHelper.TryGenerateScale(c4, ScaleType.Dorian, out var CDorianScale);
+        var result = ScaleHelper.TryGenerateScale(c4, Mode.Dorian, out var CDorianScale);
         Assert.True(result);
         Assert.Equal(8, CDorianScale.Length);
 
