@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MusicTheory\MusicTheory.csproj" />
+    <ProjectReference Include="..\PedalSteel\PedalSteel.csproj" />
   </ItemGroup>
 
 </Project>

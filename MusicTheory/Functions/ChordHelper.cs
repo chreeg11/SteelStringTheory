@@ -12,7 +12,7 @@ namespace MusicTheory.Functions
                 return false;
             }
 
-            var key = new Key(root.SpelledName, root.Accidental, Mode.Major);
+            var key = new Key(root.NoteName, root.Accidental, Mode.Major);
 
             List<Note> theChord = [root];
             foreach (int offset in intervals)

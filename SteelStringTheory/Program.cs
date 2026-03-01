@@ -1,5 +1,6 @@
 ﻿using MusicTheory.Models;
 using MusicTheory.Functions;
+using PedalSteel.Models;
 
 // Enharmonic equivalents — same sound, different spelling
 var db4 = new Note(NoteName.D, Accidental.Flat, 4);
@@ -11,9 +12,11 @@ Console.WriteLine($"Same pitch? {db4.PitchClass == cs4.PitchClass}");
 // Transpose C4 up a major 3rd (4 semitones)
 var c4 = new Note(NoteName.C, Accidental.Natural, 4);
 var up4 = NoteHelper.Transpose(c4, 4);
-Console.WriteLine($"\nC4 + 4 semitones = {up4.SpelledName}{up4.Accidental} {up4.Octave}");
+Console.WriteLine($"\nC4 + 4 semitones = {up4.NoteName}{up4.Accidental} {up4.Octave}");
 
 // Interval between C and G
 var g4 = new Note(NoteName.G, Accidental.Natural, 4);
 var interval = IntervalHelper.GetInterval(c4, g4);
 Console.WriteLine($"\nC4 to G4 = {interval.Semitones} semitones ({IntervalHelper.GetIntervalName(interval.Semitones)})");
+
+var lowBString = new GuitarString(10, new Note(NoteName.B, Accidental.Natural, 2));

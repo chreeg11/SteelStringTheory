@@ -62,7 +62,7 @@ public class NoteHelperTests
 
         var result = NoteHelper.Transpose(c4, 3, key); // C + 3 = Eb
 
-        Assert.Equal(NoteName.E, result.SpelledName);
+        Assert.Equal(NoteName.E, result.NoteName);
         Assert.Equal(Accidental.Flat, result.Accidental);
         Assert.Equal(4, result.Octave);
     }
@@ -75,7 +75,7 @@ public class NoteHelperTests
 
         var result = NoteHelper.Transpose(a4, 3, key); // A4 + 3 = C5
 
-        Assert.Equal(NoteName.C, result.SpelledName);
+        Assert.Equal(NoteName.C, result.NoteName);
         Assert.Equal(Accidental.Natural, result.Accidental);
         Assert.Equal(5, result.Octave);
     }
@@ -88,7 +88,7 @@ public class NoteHelperTests
 
         var result = NoteHelper.Transpose(c4, 1, key); // pitch class 1 is non-scale
 
-        Assert.Equal(NoteName.C, result.SpelledName);
+        Assert.Equal(NoteName.C, result.NoteName);
         Assert.Equal(Accidental.Sharp, result.Accidental);
     }
 

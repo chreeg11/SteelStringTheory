@@ -12,7 +12,7 @@ namespace MusicTheory.Functions
                 return false;
             }
 
-            var key = new Key(root.SpelledName, root.Accidental, mode);
+            var key = new Key(root.NoteName, root.Accidental, mode);
 
             List<Note> theScale = [root];
             int intervalCount = 0;
