@@ -48,9 +48,9 @@ docs/                     ← Architecture and planning docs
 
 ## Pedal Steel Domain Notes
 - Standard E9 tuning: 10 strings, 24 frets
-- A pedal: +2 semitones on strings 4 & 8 (E→F#)
-- B pedal: +1 semitone on strings 5 & 10 (B→C)
-- C pedal: +1 semitone on string 6 (G#→A)
+- A pedal: +2 semitones on strings 5 & 10 (B→C#)
+- B pedal: +1 semitone on strings 3 & 6 (G#→A)
+- C pedal: +2 semitone on string 4 & 5 (E->F#, B->C#)
 - Copedent data should be configurable (not hard-coded)
 - Each string's fret 12 = fret 0 + one octave; open strings span ~3 octaves
 - Priority: E9 → C6 → custom copedents
