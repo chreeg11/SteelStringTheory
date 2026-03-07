@@ -33,6 +33,12 @@ namespace PedalSteel.Data
 
                 // C pedal: string 4 (E → F#, +2 semitones)
                 [new Pedal("C")] = new List<StringEffect> { new(4, 2) },
+
+                // E Lever: strings 4 & 8 (E -> D#, -1 semitone)
+                [new Pedal("E")] =  new List<StringEffect> { new (4, -1), new (8, -1) },
+
+                // F Lever: strings 4 & 8 (E -> F, 1 semitone)
+                [new Pedal("F")] = new List<StringEffect> { new (4, 1), new (8, 1) },
             };
 
             return new Copedent("E9 Standard", strings, pedalEffects);

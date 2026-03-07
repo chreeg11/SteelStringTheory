@@ -43,10 +43,10 @@ public class CopedentTests
     }
 
     [Fact]
-    public void CreateE9_HasThreePedals()
+    public void CreateE9_HasFivePedalsAndLevers()
     {
         var e9 = CopedentFactory.CreateE9();
-        Assert.Equal(3, e9.PedalEffects.Count);
+        Assert.Equal(5, e9.PedalEffects.Count);
     }
 
     [Fact]

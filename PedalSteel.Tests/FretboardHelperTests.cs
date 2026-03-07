@@ -1,3 +1,4 @@
+using MusicTheory.Functions;
 using MusicTheory.Models;
 using PedalSteel.Data;
 using PedalSteel.Functions;
@@ -155,6 +156,62 @@ public class FretboardHelperTests
         Assert.Equal(4, result.Octave);
     }
 
+    // --- E lever (-1 semitone on strings 4 & 8) ---
+
+    [Fact]
+    public void GetNoteAtFret_String4_Fret0_ELever_ReturnsDSharp4()
+    {
+        var string4 = _e9.Strings.Single(s => s.Number == 4); // E4 - 1 = D#4
+        var pedalState = PedalState.With(new Pedal("E"));
+
+        var result = FretboardHelper.GetNoteAtFret(string4, 0, _e9, pedalState);
+
+        Assert.Equal(NoteName.D, result.NoteName);
+        Assert.Equal(Accidental.Sharp, result.Accidental);
+        Assert.Equal(4, result.Octave);
+    }
+
+    [Fact]
+    public void GetNoteAtFret_String8_Fret0_ELever_ReturnsDSharp3()
+    {
+        var string8 = _e9.Strings.Single(s => s.Number == 8); // E3 - 1 = D#3
+        var pedalState = PedalState.With(new Pedal("E"));
+
+        var result = FretboardHelper.GetNoteAtFret(string8, 0, _e9, pedalState);
+
+        Assert.Equal(NoteName.D, result.NoteName);
+        Assert.Equal(Accidental.Sharp, result.Accidental);
+        Assert.Equal(3, result.Octave);
+    }
+
+    // --- F lever (+1 semitone on strings 4 & 8) ---
+
+    [Fact]
+    public void GetNoteAtFret_String4_Fret0_FLever_ReturnsF4()
+    {
+        var string4 = _e9.Strings.Single(s => s.Number == 4); // E4 + 1 = F4
+        var pedalState = PedalState.With(new Pedal("F"));
+
+        var result = FretboardHelper.GetNoteAtFret(string4, 0, _e9, pedalState);
+
+        Assert.Equal(NoteName.F, result.NoteName);
+        Assert.Equal(Accidental.Natural, result.Accidental);
+        Assert.Equal(4, result.Octave);
+    }
+
+    [Fact]
+    public void GetNoteAtFret_String8_Fret0_FLever_ReturnsF3()
+    {
+        var string8 = _e9.Strings.Single(s => s.Number == 8); // E3 + 1 = F3
+        var pedalState = PedalState.With(new Pedal("F"));
+
+        var result = FretboardHelper.GetNoteAtFret(string8, 0, _e9, pedalState);
+
+        Assert.Equal(NoteName.F, result.NoteName);
+        Assert.Equal(Accidental.Natural, result.Accidental);
+        Assert.Equal(3, result.Octave);
+    }
+
     // --- Multiple pedals ---
 
     [Fact]
@@ -195,5 +252,314 @@ public class FretboardHelperTests
 
         Assert.Throws<ArgumentException>(() =>
             FretboardHelper.GetNoteAtFret(string5, -1, _e9, PedalState.Open));
+    }
+
+    // ==========================================================
+    // GetScalePositions (fixed pedal state)
+    // ==========================================================
+
+    [Fact]
+    public void GetScalePositions_CMajor_Open_AllResultsAreScaleTones()
+    {
+        var cMajorPitchClasses = new HashSet<int> { 0, 2, 4, 5, 7, 9, 11 };
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale).ToList();
+
+        Assert.All(positions, p => Assert.Contains(p.Note.PitchClass, cMajorPitchClasses));
+    }
+
+    [Fact]
+    public void GetScalePositions_CMajor_Open_CoversAllStrings()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale).ToList();
+        var stringsHit = positions.Select(p => p.StringNumber).Distinct();
+
+        // Every string has at least some C Major tones across 25 frets
+        Assert.Equal(10, stringsHit.Count());
+    }
+
+    [Fact]
+    public void GetScalePositions_CMajor_Open_Fret0_MatchesManualCalculation()
+    {
+        // Open E9 pitch classes at fret 0: F#(6), D#(3), G#(8), E(4), B(11), G#(8), F#(6), E(4), D(2), B(11)
+        // C Major pitch classes: {0, 2, 4, 5, 7, 9, 11}
+        // Matches at fret 0: E(4) on strings 4,8; B(11) on strings 5,10; D(2) on string 9
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale, minFret: 0, maxFret: 0).ToList();
+
+        Assert.Equal(5, positions.Count);
+        Assert.Contains(positions, p => p.StringNumber == 4 && p.Fret == 0);  // E4
+        Assert.Contains(positions, p => p.StringNumber == 5 && p.Fret == 0);  // B3
+        Assert.Contains(positions, p => p.StringNumber == 8 && p.Fret == 0);  // E3
+        Assert.Contains(positions, p => p.StringNumber == 9 && p.Fret == 0);  // D3
+        Assert.Contains(positions, p => p.StringNumber == 10 && p.Fret == 0); // B2
+    }
+
+    [Fact]
+    public void GetScalePositions_ConstrainedFretRange_OnlyReturnsFretInRange()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale, minFret: 5, maxFret: 7).ToList();
+
+        Assert.All(positions, p =>
+        {
+            Assert.InRange(p.Fret, 5, 7);
+        });
+        Assert.NotEmpty(positions);
+    }
+
+    [Fact]
+    public void GetScalePositions_EachPositionHasCorrectPedalState()
+    {
+        var pedalState = PedalState.With(new Pedal("A"));
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, pedalState, scale).ToList();
+
+        Assert.All(positions, p => Assert.Equal(pedalState, p.PedalState));
+    }
+
+    [Fact]
+    public void GetScalePositions_NoteMatchesGetNoteAtFret()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale, maxFret: 12).ToList();
+
+        Assert.All(positions, p =>
+        {
+            var gs = _e9.Strings.Single(s => s.Number == p.StringNumber);
+            var expected = FretboardHelper.GetNoteAtFret(gs, p.Fret, _e9, PedalState.Open);
+            Assert.Equal(expected, p.Note);
+        });
+    }
+
+    // ==========================================================
+    // GetScalePositions (convenience overload: root + mode)
+    // ==========================================================
+
+    [Fact]
+    public void GetScalePositions_ConvenienceOverload_MatchesExplicitScale()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var fromScale = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale).ToList();
+        var fromOverload = FretboardHelper.GetScalePositions(
+            _e9, PedalState.Open, NoteName.C, Accidental.Natural, Mode.Major).ToList();
+
+        Assert.Equal(fromScale.Count, fromOverload.Count);
+        Assert.Equal(fromScale, fromOverload);
+    }
+
+    // ==========================================================
+    // GetScalePositionsAllPedalStates
+    // ==========================================================
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_FindsMoreThanFixedOpen()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var openOnly = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale).ToList();
+        var allStates = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+
+        Assert.True(allStates.Count > openOnly.Count);
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_AllResultsAreScaleTones()
+    {
+        var cMajorPitchClasses = new HashSet<int> { 0, 2, 4, 5, 7, 9, 11 };
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+
+        Assert.All(positions, p => Assert.Contains(p.Note.PitchClass, cMajorPitchClasses));
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_IncludesOpenPedalState()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+
+        Assert.Contains(positions, p => p.PedalState == PedalState.Open);
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_IncludesNonOpenPedalStates()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+        var pedalA = new Pedal("A");
+
+        Assert.Contains(positions, p => p.PedalState.IsEngaged(pedalA));
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_E9Has32PedalCombinations()
+    {
+        // E9 has 5 pedals/levers (A, B, C, E, F) → 2⁵ = 32 pedal states (including open)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+
+        var distinctStates = positions
+            .Select(p => string.Join(",", p.PedalState.ActivePedals.Select(x => x.Name).OrderBy(n => n)))
+            .Distinct()
+            .ToList();
+
+        Assert.Equal(32, distinctStates.Count);
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_ConvenienceOverload_MatchesExplicitScale()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var fromScale = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+        var fromOverload = FretboardHelper.GetScalePositionsAllPedalStates(
+            _e9, NoteName.C, Accidental.Natural, Mode.Major).ToList();
+
+        Assert.Equal(fromScale.Count, fromOverload.Count);
+
+        // Compare by string/fret/note since PedalState uses HashSet (reference equality)
+        var scaleKeys = fromScale.Select(p => (p.StringNumber, p.Fret, p.Note)).ToList();
+        var overloadKeys = fromOverload.Select(p => (p.StringNumber, p.Fret, p.Note)).ToList();
+        Assert.Equal(scaleKeys, overloadKeys);
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_NoteMatchesGetNoteAtFret()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var positions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale, maxFret: 12).ToList();
+
+        Assert.All(positions, p =>
+        {
+            var gs = _e9.Strings.Single(s => s.Number == p.StringNumber);
+            var expected = FretboardHelper.GetNoteAtFret(gs, p.Fret, _e9, p.PedalState);
+            Assert.Equal(expected, p.Note);
+        });
+    }
+
+    // ==========================================================
+    // Domain truth: C Major IS achievable at a single fret
+    // by engaging different pedal combinations while barring
+    // ==========================================================
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(8)]
+    [InlineData(10)]
+    [InlineData(15)]
+    [InlineData(20)]
+    [InlineData(22)]
+    public void GetScalePositionsAllPedalStates_CMajor_FullScaleAtSingleFret(int fret)
+    {
+        // On E9 pedal steel you can achieve all 7 C Major pitch classes at certain frets
+        // by engaging different pedals while barring the same fret.
+        // e.g. Fret 8 open gives C,D,E,G,B; A pedal adds A; B pedal adds F.
+        var cMajorPitchClasses = new HashSet<int> { 0, 2, 4, 5, 7, 9, 11 };
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var allPositions = FretboardHelper.GetScalePositionsAllPedalStates(_e9, scale).ToList();
+        var atThisFret = allPositions.Where(p => p.Fret == fret).ToList();
+        var pitchClassesFound = new HashSet<int>(atThisFret.Select(p => p.Note.PitchClass));
+
+        Assert.Superset(cMajorPitchClasses, pitchClassesFound);
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_CMajor_Fret8_OpenGivesFiveScaleTones()
+    {
+        // Verify the specific pedal story at fret 8:
+        // Open strings at fret 8 produce C(0), D(2), E(4), G(7), B(11) — 5 of 7
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var openAtFret8 = FretboardHelper.GetScalePositions(_e9, PedalState.Open, scale, minFret: 8, maxFret: 8).ToList();
+        var openPcs = new HashSet<int>(openAtFret8.Select(p => p.Note.PitchClass));
+
+        Assert.Contains(0, openPcs);  // C
+        Assert.Contains(2, openPcs);  // D
+        Assert.Contains(4, openPcs);  // E
+        Assert.Contains(7, openPcs);  // G
+        Assert.Contains(11, openPcs); // B
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_CMajor_Fret8_APedalAddsA()
+    {
+        // A pedal at fret 8: B strings (5&10) shift +2 → A (pc 9)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var pedalA = PedalState.With(new Pedal("A"));
+        var withAAtFret8 = FretboardHelper.GetScalePositions(_e9, pedalA, scale, minFret: 8, maxFret: 8).ToList();
+        var aPcs = new HashSet<int>(withAAtFret8.Select(p => p.Note.PitchClass));
+
+        Assert.Contains(9, aPcs); // A — contributed by A pedal on B strings
+    }
+
+    [Fact]
+    public void GetScalePositionsAllPedalStates_CMajor_Fret8_BPedalAddsF()
+    {
+        // B pedal at fret 8: G# strings (3&6) shift +1 → F (pc 5)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+
+        var pedalB = PedalState.With(new Pedal("B"));
+        var withBAtFret8 = FretboardHelper.GetScalePositions(_e9, pedalB, scale, minFret: 8, maxFret: 8).ToList();
+        var bPcs = new HashSet<int>(withBAtFret8.Select(p => p.Note.PitchClass));
+
+        Assert.Contains(5, bPcs); // F — contributed by B pedal on G# strings
+    }
+
+    // ==========================================================
+    // FretPosition value equality
+    // ==========================================================
+
+    [Fact]
+    public void FretPosition_ValueEquality_SameValues_AreEqual()
+    {
+        var note = new Note(NoteName.B, Accidental.Natural, 3);
+        var a = new FretPosition(5, 0, note, PedalState.Open);
+        var b = new FretPosition(5, 0, note, PedalState.Open);
+
+        Assert.Equal(a, b);
+    }
+
+    [Fact]
+    public void FretPosition_ValueEquality_DifferentFret_NotEqual()
+    {
+        var note = new Note(NoteName.B, Accidental.Natural, 3);
+        var a = new FretPosition(5, 0, note, PedalState.Open);
+        var b = new FretPosition(5, 1, note, PedalState.Open);
+
+        Assert.NotEqual(a, b);
     }
 }

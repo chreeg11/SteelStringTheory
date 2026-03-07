@@ -32,5 +32,17 @@
         public int Semitone => SemitonesFromC[NoteName] + (int)Accidental;
         public int PitchClass => ((Semitone % 12) + 12) % 12;
         public int MidiNumber => (Octave + 1) * 12 + Semitone;
+
+        private static readonly Dictionary<Accidental, string> AccidentalSymbols = new()
+        {
+            { Accidental.DoubleFlat,  "bb" },
+            { Accidental.Flat,        "b"  },
+            { Accidental.Natural,     ""   },
+            { Accidental.Sharp,       "#"  },
+            { Accidental.DoubleSharp, "##" },
+        };
+
+        /// <summary>Returns a human-readable note name, e.g. "F#4", "Bb3", "C4".</summary>
+        public override string ToString() => $"{NoteName}{AccidentalSymbols[Accidental]}{Octave}";
     }
 }
