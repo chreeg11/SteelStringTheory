@@ -105,8 +105,12 @@ public class ChordHelperTests
     }
 
     [Fact]
-    public void CDim7_Returns_C_Eb_Gb_Bbb()
+    public void CDim7_Returns_C_Eb_Gb_PitchClass9()
     {
+        // Musically the 7th of Cdim7 should be Bbb (B double-flat), but the current
+        // key-based spelling engine can't derive double-flat spellings for chromatic
+        // tones outside the scale. Pitch class 9 falls back to A Natural via the
+        // sharp default table. Correct pitch, imperfect spelling — tracked as tech debt.
         var root = new Note(NoteName.C, Accidental.Natural, 4);
         var key = new Key(NoteName.C, Accidental.Natural, Mode.Locrian);
         var result = ChordHelper.TryGenerateChord(root, ChordType.Dim7, key, out var chord);
@@ -116,7 +120,6 @@ public class ChordHelperTests
         Assert.Equal(new Note(NoteName.C, Accidental.Natural, 4), chord[0]);
         Assert.Equal(new Note(NoteName.E, Accidental.Flat, 4), chord[1]);
         Assert.Equal(new Note(NoteName.G, Accidental.Flat, 4), chord[2]);
-        // Dim7's 7th (9 semitones) = pitch class 9 = A natural in default/Locrian spelling
         Assert.Equal(9, chord[3].PitchClass);
     }
 

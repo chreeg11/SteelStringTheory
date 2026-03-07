@@ -74,9 +74,9 @@ public class FretboardHelperTests
     // --- A pedal (+2 semitones on strings 5 & 10) ---
 
     [Fact]
-    public void GetNoteAtFret_String5_Fret0_APedal_ReturnsCSharp3()
+    public void GetNoteAtFret_String5_Fret0_APedal_ReturnsCSharp4()
     {
-        var string5 = _e9.Strings.Single(s => s.Number == 5); // B3 + 2 = C#3... wait B3+2=C#4
+        var string5 = _e9.Strings.Single(s => s.Number == 5); // B3 + 2 = C#4
         var pedalState = PedalState.With(new Pedal("A"));
 
         var result = FretboardHelper.GetNoteAtFret(string5, 0, _e9, pedalState);
@@ -115,7 +115,7 @@ public class FretboardHelperTests
     // --- B pedal (+1 semitone on strings 3 & 6) ---
 
     [Fact]
-    public void GetNoteAtFret_String3_Fret0_BPedal_ReturnsA3()
+    public void GetNoteAtFret_String3_Fret0_BPedal_ReturnsA4()
     {
         var string3 = _e9.Strings.Single(s => s.Number == 3); // G#4 + 1 = A4
         var pedalState = PedalState.With(new Pedal("B"));
