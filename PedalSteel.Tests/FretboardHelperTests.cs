@@ -562,4 +562,211 @@ public class FretboardHelperTests
 
         Assert.NotEqual(a, b);
     }
+
+    // ==========================================================
+    // GetBarPosition — single fret, grouped by string
+    // ==========================================================
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_HasTenStrings()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+
+        Assert.Equal(10, bar.Strings.Count);
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_AllSevenDegreesCovered()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+
+        // C Ionian has 7 degrees: R, 2, 3, 4, 5, 6, 7
+        Assert.Contains("R", bar.CoveredDegrees);
+        Assert.Contains("2", bar.CoveredDegrees);
+        Assert.Contains("3", bar.CoveredDegrees);
+        Assert.Contains("4", bar.CoveredDegrees);
+        Assert.Contains("5", bar.CoveredDegrees);
+        Assert.Contains("6", bar.CoveredDegrees);
+        Assert.Contains("7", bar.CoveredDegrees);
+        Assert.Equal(7, bar.CoveredDegrees.Count);
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_NonTargetStringsHaveNoOptions()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+        var nonTargets = bar.Strings.Where(s => !s.HasTarget).ToList();
+
+        Assert.All(nonTargets, s => Assert.Empty(s.TargetOptions));
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_String4_SimplestOptionIsRoot()
+    {
+        // String 4 at fret 8: open → C (root), C pedal → D (2nd), E lever → B (7th)
+        // First option (simplest) should be open → Root
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+        var string4 = bar.Strings.Single(s => s.StringNumber == 4);
+
+        Assert.True(string4.HasTarget);
+        Assert.Equal("R", string4.TargetOptions[0].DegreeLabel);
+        Assert.Equal(PedalState.Open, string4.TargetOptions[0].PedalState);
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_String4_HasMultipleOptions()
+    {
+        // String 4 at fret 8: open → C (R), C pedal → D (2), E lever → B (7)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+        var string4 = bar.Strings.Single(s => s.StringNumber == 4);
+        var labels = string4.TargetOptions.Select(o => o.DegreeLabel).ToHashSet();
+
+        Assert.Contains("R", labels);  // open → C
+        Assert.Contains("2", labels);  // C pedal → D
+        Assert.Contains("7", labels);  // E lever → B
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_String3_BPedalGives4th()
+    {
+        // String 3 (G#4) at fret 8: open → E (3), B pedal → F (4)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+        var string3 = bar.Strings.Single(s => s.StringNumber == 3);
+        var labels = string3.TargetOptions.Select(o => o.DegreeLabel).ToHashSet();
+
+        Assert.Contains("3", labels);  // open → E
+        Assert.Contains("4", labels);  // B pedal → F
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_String5_APedalGives6th()
+    {
+        // String 5 (B3) at fret 8: open → G (5), A pedal → A (6)
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+        var string5 = bar.Strings.Single(s => s.StringNumber == 5);
+        var labels = string5.TargetOptions.Select(o => o.DegreeLabel).ToHashSet();
+
+        Assert.Contains("5", labels);  // open → G
+        Assert.Contains("6", labels);  // A pedal → A
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_TargetStringCountIsCorrect()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+
+        Assert.Equal(bar.Strings.Count(s => s.HasTarget), bar.TargetStringCount);
+        Assert.True(bar.TargetStringCount >= 7);
+    }
+
+    [Fact]
+    public void GetBarPosition_Fret8_CMajor_OpenNoteMatchesGetNoteAtFret()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bar = FretboardHelper.GetBarPosition(_e9, 8, scale, root);
+
+        Assert.All(bar.Strings, s =>
+        {
+            var gs = _e9.Strings.Single(g => g.Number == s.StringNumber);
+            var expected = FretboardHelper.GetNoteAtFret(gs, 8, _e9, PedalState.Open);
+            Assert.Equal(expected, s.OpenNote);
+        });
+    }
+
+    // ==========================================================
+    // GetBarPositions — all frets in range
+    // ==========================================================
+
+    [Fact]
+    public void GetBarPositions_CMajor_DefaultRange_Returns25Positions()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bars = FretboardHelper.GetBarPositions(_e9, scale, root);
+
+        Assert.Equal(25, bars.Count); // frets 0-24
+    }
+
+    [Fact]
+    public void GetBarPositions_CMajor_ConstrainedRange_ReturnsCorrectCount()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var bars = FretboardHelper.GetBarPositions(_e9, scale, root, minFret: 5, maxFret: 10);
+
+        Assert.Equal(6, bars.Count); // frets 5-10
+        Assert.All(bars, b => Assert.InRange(b.Fret, 5, 10));
+    }
+
+    [Fact]
+    public void GetBarPositions_ConvenienceOverload_MatchesExplicit()
+    {
+        ScaleHelper.TryGenerateScale(
+            new Note(NoteName.C, Accidental.Natural, 4), Mode.Major, out var scale);
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+
+        var fromExplicit = FretboardHelper.GetBarPositions(_e9, scale, root, 0, 12);
+        var fromOverload = FretboardHelper.GetBarPositions(
+            _e9, NoteName.C, Accidental.Natural, Mode.Major, 0, 12);
+
+        Assert.Equal(fromExplicit.Count, fromOverload.Count);
+        for (int i = 0; i < fromExplicit.Count; i++)
+        {
+            Assert.Equal(fromExplicit[i].Fret, fromOverload[i].Fret);
+            Assert.Equal(fromExplicit[i].TargetStringCount, fromOverload[i].TargetStringCount);
+        }
+    }
+
+    // ==========================================================
+    // NoteOption value equality
+    // ==========================================================
+
+    [Fact]
+    public void NoteOption_SameValues_AreEqual()
+    {
+        var note = new Note(NoteName.C, Accidental.Natural, 4);
+        var a = new NoteOption(note, PedalState.Open, "R");
+        var b = new NoteOption(note, PedalState.Open, "R");
+
+        Assert.Equal(a, b);
+    }
 }

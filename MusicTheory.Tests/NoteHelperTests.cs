@@ -136,6 +136,74 @@ public class IntervalHelperTests
         Assert.Equal(expected, IntervalHelper.GetIntervalName(semitones));
     }
 
+    // --- GetDegreeLabel (semitone overload) ---
+
+    [Theory]
+    [InlineData(0,  "R")]
+    [InlineData(1,  "b2")]
+    [InlineData(2,  "2")]
+    [InlineData(3,  "b3")]
+    [InlineData(4,  "3")]
+    [InlineData(5,  "4")]
+    [InlineData(6,  "b5")]
+    [InlineData(7,  "5")]
+    [InlineData(8,  "b6")]
+    [InlineData(9,  "6")]
+    [InlineData(10, "b7")]
+    [InlineData(11, "7")]
+    public void GetDegreeLabel_AllTwelveSemitones_ReturnsCorrectLabel(int semitones, string expected)
+    {
+        Assert.Equal(expected, IntervalHelper.GetDegreeLabel(semitones));
+    }
+
+    [Theory]
+    [InlineData(12, "R")]   // Octave wraps to root
+    [InlineData(16, "3")]   // 16 % 12 = 4 → "3"
+    [InlineData(-1, "7")]   // Negative wraps correctly
+    [InlineData(-5, "5")]   // -5 → 7 semitones → "5"
+    public void GetDegreeLabel_WrapsCorrectly(int semitones, string expected)
+    {
+        Assert.Equal(expected, IntervalHelper.GetDegreeLabel(semitones));
+    }
+
+    // --- GetDegreeLabel (Note overload) ---
+
+    [Fact]
+    public void GetDegreeLabel_CToE_Returns3()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var note = new Note(NoteName.E, Accidental.Natural, 4);
+
+        Assert.Equal("3", IntervalHelper.GetDegreeLabel(root, note));
+    }
+
+    [Fact]
+    public void GetDegreeLabel_CToG_Returns5()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var note = new Note(NoteName.G, Accidental.Natural, 5); // different octave shouldn't matter
+
+        Assert.Equal("5", IntervalHelper.GetDegreeLabel(root, note));
+    }
+
+    [Fact]
+    public void GetDegreeLabel_CToC_ReturnsR()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var note = new Note(NoteName.C, Accidental.Natural, 5);
+
+        Assert.Equal("R", IntervalHelper.GetDegreeLabel(root, note));
+    }
+
+    [Fact]
+    public void GetDegreeLabel_CToBb_Returnsb7()
+    {
+        var root = new Note(NoteName.C, Accidental.Natural, 4);
+        var note = new Note(NoteName.B, Accidental.Flat, 3);
+
+        Assert.Equal("b7", IntervalHelper.GetDegreeLabel(root, note));
+    }
+
     [Fact]
     public void GetInterval_C4ToE4_Returns4SemitonesAscending()
     {

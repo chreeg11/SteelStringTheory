@@ -148,6 +148,88 @@ public static class FretboardHelper
         return GetScalePositionsAllPedalStates(copedent, scaleNotes, minFret, maxFret);
     }
 
+    // ==========================================================
+    // Bar Position queries (fret-grouped, labeled)
+    // ==========================================================
+
+    /// <summary>
+    /// Returns a bar-position view at a single fret: one BarString per physical string,
+    /// each showing its open note and ALL pedal states that produce target tones.
+    /// Target options are sorted by pedal count (simplest first).
+    /// </summary>
+    public static BarPosition GetBarPosition(
+        Copedent copedent,
+        int fret,
+        Note[] targetNotes,
+        Note rootNote)
+    {
+        var targetPitchClasses = new HashSet<int>(targetNotes.Select(n => n.PitchClass));
+        var allStates = GenerateAllPedalStates(copedent);
+        var barStrings = new List<BarString>();
+
+        foreach (var guitarString in copedent.Strings)
+        {
+            var openNote = GetNoteAtFret(guitarString, fret, copedent, PedalState.Open);
+            var seenPitchClasses = new HashSet<int>();
+            var targetOptions = new List<NoteOption>();
+
+            foreach (var pedalState in allStates.OrderBy(s => s.ActivePedals.Count))
+            {
+                var note = GetNoteAtFret(guitarString, fret, copedent, pedalState);
+                if (targetPitchClasses.Contains(note.PitchClass) && seenPitchClasses.Add(note.PitchClass))
+                {
+                    var label = IntervalHelper.GetDegreeLabel(rootNote, note);
+                    targetOptions.Add(new NoteOption(note, pedalState, label));
+                }
+            }
+
+            barStrings.Add(new BarString(guitarString.Number, openNote, targetOptions));
+        }
+
+        return new BarPosition(fret, barStrings);
+    }
+
+    /// <summary>
+    /// Returns bar positions for every fret in the range.
+    /// </summary>
+    public static IReadOnlyList<BarPosition> GetBarPositions(
+        Copedent copedent,
+        Note[] targetNotes,
+        Note rootNote,
+        int minFret = 0,
+        int maxFret = 24)
+    {
+        var positions = new List<BarPosition>();
+        for (int fret = minFret; fret <= maxFret; fret++)
+        {
+            positions.Add(GetBarPosition(copedent, fret, targetNotes, rootNote));
+        }
+        return positions;
+    }
+
+    /// <summary>
+    /// Convenience overload — builds the scale from root + mode, then returns bar positions.
+    /// </summary>
+    public static IReadOnlyList<BarPosition> GetBarPositions(
+        Copedent copedent,
+        NoteName root,
+        Accidental accidental,
+        Mode mode,
+        int minFret = 0,
+        int maxFret = 24)
+    {
+        if (!ScaleHelper.TryGenerateScale(new Note(root, accidental, 4), mode, out var scaleNotes))
+        {
+            return [];
+        }
+
+        return GetBarPositions(copedent, scaleNotes, new Note(root, accidental, 4), minFret, maxFret);
+    }
+
+    // ==========================================================
+    // Internal helpers
+    // ==========================================================
+
     /// <summary>
     /// Generates all possible pedal states (power set of pedals in the copedent).
     /// For 5 pedals/levers this is 2^5 = 32 combinations — very manageable.
